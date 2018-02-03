@@ -1,0 +1,59 @@
+version: '3'
+services:
+    mariadb:
+        image: "mariadb:${SEAFILE_MARIADB_VERSION}"
+        container_name: "${SEAFILE_MARIADB_HOST}"
+        volumes:
+            - "${SEAFILE_HOST_MARIADB_ROOT}/conf:/etc/mysql/conf.d"
+            - "${SEAFILE_HOST_MARIADB_ROOT}/data:/var/lib/mysql"
+        networks:
+            - net
+        environment:
+            - MYSQL_ROOT_PASSWORD
+    server:
+        depends_on: 
+            - mariadb
+        image: "xiay/seafile:${SEAFILE_VERSION}"
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                - SEAFILE_ROOT
+                - SEAFILE_ARCHIVE
+                - SEAFILE_MARIADB_HOST
+                - SEAFILE_MARIADB_PORT
+        volumes:
+            - "${SEAFILE_HOST_WORKDIR}:${SEAFILE_ROOT}"
+        expose:
+            - "${SEAFILE_SEAHUB_SERVER_PORT}"
+        networks:
+            net:
+                ipv4_address: "${SEAFILE_SERVER_IPV4_ADDR}"
+        links:
+            - mariadb
+        environment:
+            - SEAFILE_MARIADB_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD}"
+            - SEAFILE_MARIADB_HOST
+            - SEAFILE_MARIADB_PORT
+            - SEAFILE_SERVER_TARBALL
+            - SEAFILE_SERVER_DIRNAME
+            - SEAFILE_SERVER_NAME
+            - SEAFILE_SERVER_HOST
+            - SEAFILE_SERVER_PORT
+            - SEAFILE_INIT_DATABASE
+            - SEAFILE_MARIADB_USER_HOST
+            - SEAFILE_MARIADB_USER
+            - SEAFILE_MARIADB_PASSWORD
+            - SEAFILE_CCNET_DB_NAME
+            - SEAFILE_SEAFILE_DB_NAME
+            - SEAFILE_SEAHUB_DB_NAME
+            - SEAFILE_SEAHUB_SERVER_PORT
+            - SEAFILE_SEAHUB_ADMIN_EMAIL
+            - SEAFILE_SEAHUB_ADMIN_PASSWORD
+networks:
+    net:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: "${SEAFILE_DOCKER_NETWORK_SUBNET}"
