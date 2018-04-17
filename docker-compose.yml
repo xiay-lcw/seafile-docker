@@ -26,6 +26,7 @@ services:
             - "${SEAFILE_HOST_WORKDIR}:${SEAFILE_ROOT}"
         expose:
             - "${SEAFILE_SEAHUB_SERVER_PORT}"
+            - "${SEAFILE_SERVER_PORT}"
         networks:
             net:
                 ipv4_address: "${SEAFILE_SERVER_IPV4_ADDR}"
